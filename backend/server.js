@@ -1,65 +1,79 @@
 const express = require('express');
 const cors = require('cors');
+const connectDB = require('./config/database');
+const { errorHandler, notFound } = require('./middleware/errorHandler');
+const logRequest = require('./middleware/requestLogger');
+
+// Import routes
+const logRoutes = require('./routes/logRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+// Connect to MongoDB
+connectDB();
 
-// In-memory mock database for logs
-let logs = [
-  {
-    id: "1",
-    userId: "123",
-    action: "LOGIN",
-    entity: "User",
-    entityId: "123",
+// Middleware
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5175',
+  credentials: true
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Request logging middleware
+app.use(logRequest);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Audit Log API is running',
     timestamp: new Date().toISOString(),
-    ipAddress: "192.168.1.1"
-  },
-  {
-    id: "2",
-    userId: "456",
-    action: "DELETE_ORDER",
-    entity: "Order",
-    entityId: "ORD1001",
-    timestamp: new Date(Date.now() - 3600000).toISOString(),
-    ipAddress: "192.168.1.5"
-  }
-];
-
-// GET /logs - Retrieve logs with optional filters
-app.get('/logs', (req, res) => {
-  const { userId, action } = req.query;
-  let filteredLogs = [...logs];
-
-  if (userId) {
-    filteredLogs = filteredLogs.filter(log => log.userId === userId);
-  }
-  if (action) {
-    filteredLogs = filteredLogs.filter(log => log.action === action);
-  }
-
-  // Sort by newest first
-  filteredLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-  res.json({ logs: filteredLogs });
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
-// POST /logs - Create a new log
+// API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/logs', logRoutes);
 
-app.post('/logs', (req, res) => {
-  const newLog = {
-    id: Math.random().toString(36).substring(2, 9),
-    ...req.body,
-    timestamp: req.body.timestamp || new Date().toISOString()
-  };
-  
-  logs.push(newLog);
-  res.status(201).json({ message: "Log created successfully", log: newLog });
+// Welcome route
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Welcome to Audit Log API',
+    version: '1.0.0',
+    endpoints: {
+      health: 'GET /health',
+      // Auth endpoints
+      register: 'POST /api/auth/register',
+      login: 'POST /api/auth/login',
+      profile: 'GET /api/auth/profile (protected)',
+      updateProfile: 'PUT /api/auth/profile (protected)',
+      changePassword: 'PUT /api/auth/password (protected)',
+      // Log endpoints (admin only)
+      logs: 'GET /api/logs (admin)',
+      logStats: 'GET /api/logs/stats (admin)',
+      createLog: 'POST /api/logs',
+      getLog: 'GET /api/logs/:id (admin)',
+      deleteLog: 'DELETE /api/logs/:id (admin)'
+    },
+    authentication: {
+      type: 'JWT Bearer Token',
+      header: 'Authorization: Bearer <token>',
+      adminRequired: 'Log viewing requires admin role'
+    }
+  });
 });
+
+// Error handling middleware (must be last)
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
+  console.log(`🚀 Audit Log API server running on http://localhost:${PORT}`);
+  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5175'}`);
 });

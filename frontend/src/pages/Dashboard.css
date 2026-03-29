@@ -214,3 +214,11 @@
     gap: var(--spacing-4);
   }
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin-animation {
+  animation: spin 1s linear infinite;
+}

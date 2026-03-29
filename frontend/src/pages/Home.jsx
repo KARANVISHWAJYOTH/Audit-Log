@@ -25,19 +25,7 @@ const Home = () => {
               View Documentation
             </NavLink>
           </div>
-          
-          {/* Mock code block in hero */}
-          <div className="hero-code-preview mt-8 text-left mx-auto">
-            <pre><code>
-<span className="code-comment">// Log exactly what happened</span><br/>
-<span className="code-keyword">await</span> audit.<span className="code-function">log</span>(&#123;<br/>
-&nbsp;&nbsp;action: <span className="code-string">"UPDATE_USER_ROLE"</span>,<br/>
-&nbsp;&nbsp;entity: <span className="code-string">"User"</span>,<br/>
-&nbsp;&nbsp;entityId: <span className="code-string">"usr_123"</span>,<br/>
-&nbsp;&nbsp;actorId: <span className="code-string">"adm_456"</span><br/>
-&#125;);
-            </code></pre>
-          </div>
+
         </div>
       </section>
 
