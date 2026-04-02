@@ -30,7 +30,13 @@ export const useLogs = (useFirebase = true) => {
       } else {
         result = await apiService.getLogs(params);
         if (result.success) {
-          setLogs(result.data.logs);
+          const formattedLogs = result.data.logs.map(log => ({
+            ...log,
+            user: log.details?.email || log.userId, // Show email if available, otherwise User ID
+            date: log.formattedTimestamp || new Date(log.timestamp).toLocaleString(),
+            id: log.id || log._id
+          }));
+          setLogs(formattedLogs);
           setPagination(result.data.pagination);
         } else {
           throw new Error(result.message);

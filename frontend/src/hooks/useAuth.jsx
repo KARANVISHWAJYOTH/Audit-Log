@@ -8,6 +8,7 @@ const AuthContext = createContext();
 // Auth Provider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [backendUser, setBackendUser] = useState(null);
   const [backendToken, setBackendToken] = useState(localStorage.getItem('backend_token'));
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,6 +22,14 @@ export const AuthProvider = ({ children }) => {
         // Verify token is still valid
         apiService.setAuthToken(existingToken);
         setBackendToken(existingToken);
+        try {
+          const profileResult = await apiService.get('/auth/profile');
+          if (profileResult.success) {
+            setBackendUser(profileResult.data);
+          }
+        } catch (err) {
+          console.error('Failed to fetch profile:', err);
+        }
         return;
       }
 
@@ -28,7 +37,7 @@ export const AuthProvider = ({ children }) => {
       // In production, you'd have a proper mapping between Firebase and backend users
       const loginResult = await apiService.post('/auth/login', {
         email: firebaseUser.email,
-        password: 'demo123' // This should be handled properly in production
+        password: firebaseUser.email === 'admin@auditlog.com' ? 'admin123' : 'demo123' // Match seed data
       });
 
       if (loginResult.success) {
@@ -36,6 +45,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('backend_token', token);
         apiService.setAuthToken(token);
         setBackendToken(token);
+        setBackendUser(loginResult.data.user);
       }
     } catch (error) {
       console.error('Backend authentication failed:', error);
@@ -44,8 +54,8 @@ export const AuthProvider = ({ children }) => {
         const registerResult = await apiService.post('/auth/register', {
           username: firebaseUser.displayName || firebaseUser.email.split('@')[0],
           email: firebaseUser.email,
-          password: 'demo123',
-          role: 'admin' // For demo purposes
+          password: firebaseUser.email === 'admin@auditlog.com' ? 'admin123' : 'demo123',
+          role: firebaseUser.email === 'admin@auditlog.com' ? 'admin' : 'user'
         });
 
         if (registerResult.success) {
@@ -53,6 +63,7 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem('backend_token', token);
           apiService.setAuthToken(token);
           setBackendToken(token);
+          setBackendUser(registerResult.data.user);
         }
       } catch (registerError) {
         console.error('Backend registration failed:', registerError);
@@ -70,6 +81,7 @@ export const AuthProvider = ({ children }) => {
         authenticateWithBackend(user);
       } else {
         setUser(null);
+        setBackendUser(null);
         setIsAuthenticated(false);
         setBackendToken(null);
         localStorage.removeItem('backend_token');
@@ -92,9 +104,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
+    try {
+      if (backendToken) {
+        await apiService.post('/auth/logout');
+      }
+    } catch (err) {
+      console.error('Backend logout failed:', err);
+    }
     const result = await firebaseService.signOutUser();
     localStorage.removeItem('backend_token');
     setBackendToken(null);
+    setBackendUser(null);
     apiService.setAuthToken(null);
     return result;
   };
@@ -111,6 +131,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    backendUser,
     backendToken,
     isAuthenticated,
     loading,

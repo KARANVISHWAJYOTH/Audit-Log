@@ -3,11 +3,13 @@ import { NavLink } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
 import { Sun, Moon, Menu, X, ShieldAlert, LogOut, User } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = ({ user }) => {
   const { theme, toggleTheme } = useTheme();
+  const { backendUser } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);

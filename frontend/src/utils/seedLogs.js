@@ -116,12 +116,15 @@ export const seedLogs = async () => {
 
       const logData = {
         ...log,
+        userId: log.user,
+        entityId: log.details?.orderId || log.details?.userId || log.details?.secretId || 'session_01',
         timestamp: dateTime.toISOString(),
         createdAt: new Date().toISOString()
       };
 
-      // Remove the date field since we're using timestamp
+      // Remove the date and user fields since we're using timestamp and userId
       delete logData.date;
+      delete logData.user;
 
       await apiService.createLog(logData);
       console.log(`Added log: ${log.id}`);

@@ -7,7 +7,7 @@ import './Dashboard.css';
 const ITEMS_PER_PAGE = 5;
 
 const Dashboard = () => {
-  const { logs, loading, refreshLogs } = useLogs(false); // Use backend API instead of Firebase
+  const { logs, loading, fetchLogs: refreshLogs } = useLogs(false); // Use backend API instead of Firebase
   const [searchTerm, setSearchTerm] = useState('');
   const [actionFilter, setActionFilter] = useState('ALL');
   const [currentPage, setCurrentPage] = useState(1);
@@ -159,6 +159,7 @@ const Dashboard = () => {
                 <th>Action</th>
                 <th>Entity</th>
                 <th>Status</th>
+                <th>IP Address</th>
               </tr>
             </thead>
             <tbody style={{ opacity: isRefreshing ? 0.5 : 1, transition: 'opacity 0.2s' }}>
@@ -173,6 +174,9 @@ const Dashboard = () => {
                     <td>
                       <span className={`status-dot status-${log.status?.toLowerCase()}`}></span>
                       {log.status}
+                    </td>
+                    <td className="font-mono text-tertiary">
+                      {log.ipAddress === '::1' ? '127.0.0.1' : (log.ipAddress || 'N/A')}
                     </td>
                   </tr>
                 ))

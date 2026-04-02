@@ -42,16 +42,7 @@ const logSchema = new mongoose.Schema({
   ipAddress: {
     type: String,
     required: [true, 'IP address is required'],
-    trim: true,
-    validate: {
-      validator: function(v) {
-        // Basic IP address validation
-        const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
-        const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
-        return ipv4Regex.test(v) || ipv6Regex.test(v);
-      },
-      message: 'Invalid IP address format'
-    }
+    trim: true
   },
   userAgent: {
     type: String,
@@ -113,7 +104,7 @@ logSchema.virtual('formattedTimestamp').get(function() {
 });
 
 // Pre-save middleware to set severity based on action
-logSchema.pre('save', function(next) {
+logSchema.pre('save', function() {
   const highSeverityActions = ['DELETE_USER', 'DELETE_ORDER', 'READ_SECRET', 'PERMISSION_CHANGE'];
   const criticalActions = ['FAILED_LOGIN', 'PASSWORD_CHANGE'];
 
@@ -131,8 +122,6 @@ logSchema.pre('save', function(next) {
   } else if (this.action.includes('DELETE') || this.action.includes('UPDATE')) {
     this.status = 'WARNING';
   }
-
-  next();
 });
 
 // Static method to get logs by date range

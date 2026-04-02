@@ -152,6 +152,60 @@ const Home = () => {
             <NavLink to="/api-docs" className="btn btn-primary btn-lg mt-4">Read Docs</NavLink>
          </div>
       </section>
+      {/* Test Actions Section */}
+      <section className="test-actions-section bg-secondary text-center" style={{ padding: '60px 0', borderTop: '1px solid var(--border-color)' }}>
+         <div className="container">
+            <h2>Simulate User Actions</h2>
+            <p>Click these buttons to generate test audit logs! (These will immediately appear in the Admin Dashboard)</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '20px' }}>
+              <button 
+                className="btn btn-outline" 
+                onClick={async () => {
+                  try {
+                    const apiService = (await import('../services/apiService')).default;
+                    const { auth } = await import('../firebase/config');
+                    const user = auth.currentUser;
+                    await apiService.post('/logs', {
+                      userId: user ? user.uid : 'anonymous',
+                      action: 'CREATE_ORDER',
+                      entity: 'Order',
+                      entityId: `ORD-${Math.floor(Math.random() * 10000)}`,
+                      details: { amount: Math.floor(Math.random() * 100) + 50 }
+                    });
+                    alert('Order Action Logged successfully! Check the Admin Dashboard.');
+                  } catch (e) {
+                    alert('Error logging action. Please ensure you are logged in.');
+                  }
+                }}
+              >
+                Simulate: Create Order
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={async () => {
+                  try {
+                    const apiService = (await import('../services/apiService')).default;
+                    const { auth } = await import('../firebase/config');
+                    const user = auth.currentUser;
+                    await apiService.post('/logs', {
+                      userId: user ? user.uid : 'anonymous',
+                      action: 'DELETE_USER',
+                      entity: 'User',
+                      entityId: `usr_${Math.floor(Math.random() * 1000)}`,
+                      details: { reason: 'User requested deletion' }
+                    });
+                    alert('Delete Action Logged successfully! Check the Admin Dashboard.');
+                  } catch (e) {
+                    alert('Error logging action. Please ensure you are logged in.');
+                  }
+                }}
+              >
+                Simulate: Delete User
+              </button>
+            </div>
+         </div>
+      </section>
+
     </div>
   );
 };
