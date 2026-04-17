@@ -1,6 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { ShieldCheck, Database, Search, FastForward, Lock, Users, ArrowRight } from 'lucide-react';
+import apiService from '../services/apiService';
+import { auth } from '../firebase/config';
 import './Home.css';
 
 const Home = () => {
@@ -162,8 +164,6 @@ const Home = () => {
                 className="btn btn-outline" 
                 onClick={async () => {
                   try {
-                    const apiService = (await import('../services/apiService')).default;
-                    const { auth } = await import('../firebase/config');
                     const user = auth.currentUser;
                     await apiService.post('/logs', {
                       userId: user ? user.uid : 'anonymous',
@@ -184,8 +184,6 @@ const Home = () => {
                 className="btn btn-primary" 
                 onClick={async () => {
                   try {
-                    const apiService = (await import('../services/apiService')).default;
-                    const { auth } = await import('../firebase/config');
                     const user = auth.currentUser;
                     await apiService.post('/logs', {
                       userId: user ? user.uid : 'anonymous',

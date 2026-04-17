@@ -22,15 +22,15 @@ const logRequest = (req, res, next) => {
 
       // Map HTTP methods to actions
       if (req.method === 'GET') {
-        action = 'VIEW';
+        action = 'API_ACCESS';
       } else if (req.method === 'POST') {
-        action = 'CREATE';
+        action = 'API_ACCESS';
       } else if (req.method === 'PUT') {
-        action = 'UPDATE';
+        action = 'API_ACCESS';
       } else if (req.method === 'DELETE') {
-        action = 'DELETE';
+        action = 'API_ACCESS';
       } else {
-        action = 'VIEW'; // default
+        action = 'API_ACCESS'; // default
       }
 
       // Override for specific routes

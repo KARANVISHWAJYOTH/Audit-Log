@@ -13,7 +13,7 @@ const logSchema = new mongoose.Schema({
     required: [true, 'Action is required'],
     enum: {
       values: [
-        'LOGIN', 'LOGOUT', 'CREATE', 'UPDATE', 'DELETE', 'VIEW',
+        'LOGIN', 'LOGOUT', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'API_ACCESS',
         'CREATE_ORDER', 'UPDATE_ORDER', 'DELETE_ORDER', 'EXPORT_DATA',
         'BACKUP_DB', 'READ_SECRET', 'CREATE_USER', 'UPDATE_USER', 'DELETE_USER',
         'PASSWORD_CHANGE', 'PERMISSION_CHANGE', 'SESSION_EXPIRED', 'FAILED_LOGIN'

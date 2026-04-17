@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
-import Login from './pages/Login';
-import Home from './pages/Home';
-import Features from './pages/Features';
-import Architecture from './pages/Architecture';
-import ApiDocs from './pages/ApiDocs';
-import Dashboard from './pages/Dashboard';
-import Security from './pages/Security';
+// Lazy load pages for code splitting
+const Login = React.lazy(() => import('./pages/Login'));
+const Home = React.lazy(() => import('./pages/Home'));
+const Features = React.lazy(() => import('./pages/Features'));
+const Architecture = React.lazy(() => import('./pages/Architecture'));
+const ApiDocs = React.lazy(() => import('./pages/ApiDocs'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Security = React.lazy(() => import('./pages/Security'));
 
 import './App.css';
 
@@ -78,18 +79,25 @@ const AppContent = () => {
       <div className="app">
         {isAuthenticated && <Navbar />}
         <main className="main-content">
-          <Routes>
-            <Route path="/login" element={<Login />} />
+          <Suspense fallback={
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading page...</p>
+            </div>
+          }>
+            <Routes>
+              <Route path="/login" element={<Login />} />
 
-            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-            <Route path="/features" element={<ProtectedRoute><Features /></ProtectedRoute>} />
-            <Route path="/architecture" element={<ProtectedRoute><Architecture /></ProtectedRoute>} />
-            <Route path="/api-docs" element={<ProtectedRoute><ApiDocs /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
-            <Route path="/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
+              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/features" element={<ProtectedRoute><Features /></ProtectedRoute>} />
+              <Route path="/architecture" element={<ProtectedRoute><Architecture /></ProtectedRoute>} />
+              <Route path="/api-docs" element={<ProtectedRoute><ApiDocs /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
+              <Route path="/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
 
-            <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
-          </Routes>
+              <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+            </Routes>
+          </Suspense>
         </main>
         {isAuthenticated && <Footer />}
       </div>
