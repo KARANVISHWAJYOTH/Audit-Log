@@ -16,26 +16,33 @@ const logRequest = (req, res, next) => {
       }
 
       // Determine action based on HTTP method and path
-      let action = 'API_ACCESS';
-      let entity = 'API';
+      let action;
+      let entity = 'AuditLog';
       let entityId = `${req.method}_${req.path}`;
 
-      // Map common API patterns to actions
-      if (req.method === 'POST' && req.path === '/api/auth/register') {
-        action = 'USER_REGISTRATION_ATTEMPT';
-        entity = 'User';
-      } else if (req.method === 'POST' && req.path === '/api/auth/login') {
-        action = 'LOGIN_ATTEMPT';
+      // Map HTTP methods to actions
+      if (req.method === 'GET') {
+        action = 'VIEW';
+      } else if (req.method === 'POST') {
+        action = 'CREATE';
+      } else if (req.method === 'PUT') {
+        action = 'UPDATE';
+      } else if (req.method === 'DELETE') {
+        action = 'DELETE';
+      } else {
+        action = 'VIEW'; // default
+      }
+
+      // Override for specific routes
+      if (req.path === '/api/auth/login') {
+        action = 'LOGIN';
         entity = 'Session';
-      } else if (req.method === 'GET' && req.path.startsWith('/api/logs')) {
-        action = 'VIEW_LOGS';
-        entity = 'AuditLogs';
-      } else if (req.method === 'POST' && req.path === '/api/logs') {
-        action = 'CREATE_LOG';
-        entity = 'AuditLog';
-      } else if (req.method === 'DELETE' && req.path.startsWith('/api/logs/')) {
-        action = 'DELETE_LOG';
-        entity = 'AuditLog';
+      } else if (req.path === '/api/auth/register') {
+        action = 'CREATE_USER';
+        entity = 'User';
+      } else if (req.path === '/api/auth/logout') {
+        action = 'LOGOUT';
+        entity = 'Session';
       }
 
       // Create log entry
