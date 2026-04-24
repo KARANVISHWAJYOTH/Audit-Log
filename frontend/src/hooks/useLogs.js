@@ -30,12 +30,14 @@ export const useLogs = (useFirebase = true) => {
       } else {
         result = await apiService.getLogs(params);
         if (result.success) {
-          const formattedLogs = result.data.logs.map(log => ({
-            ...log,
-            user: log.details?.email || log.userId, // Show email if available, otherwise User ID
-            date: log.formattedTimestamp || new Date(log.timestamp).toLocaleString(),
-            id: log.id || log._id
-          }));
+          const formattedLogs = result.data.logs
+            .filter(log => log.action !== 'API_ACCESS')
+            .map(log => ({
+              ...log,
+              user: log.details?.email || log.userId, // Show email if available, otherwise User ID
+              date: log.formattedTimestamp || new Date(log.timestamp).toLocaleString(),
+              id: log.id || log._id
+            }));
           setLogs(formattedLogs);
           setPagination(result.data.pagination);
         } else {

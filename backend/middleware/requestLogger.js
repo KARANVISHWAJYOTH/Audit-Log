@@ -45,6 +45,11 @@ const logRequest = (req, res, next) => {
         entity = 'Session';
       }
 
+      // Skip generic API access logs
+      if (action === 'API_ACCESS') {
+        return;
+      }
+
       // Create log entry
       const logEntry = new Log({
         userId,
