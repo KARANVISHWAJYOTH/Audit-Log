@@ -19,14 +19,8 @@ const getApiBaseUrl = () => {
   );
 };
 
-let API_BASE_URL;
-try {
-  API_BASE_URL = getApiBaseUrl();
-  console.log('✅ API Base URL configured:', API_BASE_URL);
-} catch (error) {
-  console.error('❌', error.message);
-  API_BASE_URL = 'http://localhost:5000/api'; // Fallback for development
-}
+const API_BASE_URL = getApiBaseUrl();
+console.log('✅ API Base URL configured:', API_BASE_URL);
 
 class ApiService {
   constructor() {
