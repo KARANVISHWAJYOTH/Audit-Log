@@ -1,5 +1,32 @@
 // API service for backend communication
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// This uses VITE_API_URL from environment variables
+// In production, VITE_API_URL must be explicitly set to the deployed backend URL
+
+const getApiBaseUrl = () => {
+  // Priority 1: Explicit VITE_API_URL from environment
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  // Priority 2: For development, use localhost
+  if (import.meta.env.DEV) {
+    return 'http://localhost:5000/api';
+  }
+
+  // Priority 3: Production without VITE_API_URL - throw error
+  throw new Error(
+    'VITE_API_URL is not configured. In production, you must set VITE_API_URL environment variable to your backend URL (e.g., https://your-backend.onrender.com/api)'
+  );
+};
+
+let API_BASE_URL;
+try {
+  API_BASE_URL = getApiBaseUrl();
+  console.log('✅ API Base URL configured:', API_BASE_URL);
+} catch (error) {
+  console.error('❌', error.message);
+  API_BASE_URL = 'http://localhost:5000/api'; // Fallback for development
+}
 
 class ApiService {
   constructor() {
@@ -12,7 +39,7 @@ class ApiService {
     this.authToken = token;
   }
 
-  // Generic request method
+  // Generic request method with improved error handling
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
     const config = {
@@ -31,17 +58,38 @@ class ApiService {
     try {
       const response = await fetch(url, config);
 
-      // Handle different response types
+      // Handle different response statuses
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Network error' }));
-        throw new Error(errorData.message || `HTTP ${response.status}`);
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+          // Response is not JSON, use status message
+          errorMessage = response.statusText || errorMessage;
+        }
+
+        const error = new Error(errorMessage);
+        error.status = response.status;
+        throw error;
       }
 
       const data = await response.json();
-      return data;
+      return {
+        success: true,
+        data: data.data || data,
+        message: data.message || 'Success'
+      };
     } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+      console.error(`API Error [${endpoint}]:`, error.message);
+
+      // Return error in consistent format
+      return {
+        success: false,
+        message: error.message || 'Failed to fetch from API',
+        error: error.message,
+        status: error.status
+      };
     }
   }
 

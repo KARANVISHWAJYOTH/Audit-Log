@@ -3,7 +3,12 @@ require('dotenv').config();
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    const mongoURI = process.env.MONGODB_URI;
+    if (!mongoURI) {
+      throw new Error('MONGODB_URI environment variable is not set. Please configure it in your deployment environment (e.g., Render dashboard).');
+    }
+
+    const conn = await mongoose.connect(mongoURI);
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {

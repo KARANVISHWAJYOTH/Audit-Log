@@ -165,16 +165,26 @@ const Home = () => {
                 onClick={async () => {
                   try {
                     const user = auth.currentUser;
-                    await apiService.post('/logs', {
-                      userId: user ? user.uid : 'anonymous',
+                    if (!user) {
+                      alert('❌ Error: You must be logged in first. Please sign in using Firebase auth.');
+                      return;
+                    }
+
+                    const result = await apiService.post('/logs', {
+                      userId: user.uid,
                       action: 'CREATE_ORDER',
                       entity: 'Order',
                       entityId: `ORD-${Math.floor(Math.random() * 10000)}`,
                       details: { amount: Math.floor(Math.random() * 100) + 50 }
                     });
-                    alert('Order Action Logged successfully! Check the Admin Dashboard.');
+
+                    if (result.success) {
+                      alert('✅ Order Action Logged successfully! Check the Admin Dashboard.');
+                    } else {
+                      alert(`❌ Error: ${result.message || 'Failed to log action'}\n\nMake sure:\n• Backend is running\n• VITE_API_URL is set correctly\n• You have a valid backend JWT token`);
+                    }
                   } catch (e) {
-                    alert('Error logging action. Please ensure you are logged in.');
+                    alert(`❌ Error logging action: ${e.message}\n\nPlease ensure you are logged in and backend is accessible.`);
                   }
                 }}
               >
@@ -185,16 +195,26 @@ const Home = () => {
                 onClick={async () => {
                   try {
                     const user = auth.currentUser;
-                    await apiService.post('/logs', {
-                      userId: user ? user.uid : 'anonymous',
+                    if (!user) {
+                      alert('❌ Error: You must be logged in first. Please sign in using Firebase auth.');
+                      return;
+                    }
+
+                    const result = await apiService.post('/logs', {
+                      userId: user.uid,
                       action: 'DELETE_USER',
                       entity: 'User',
                       entityId: `usr_${Math.floor(Math.random() * 1000)}`,
                       details: { reason: 'User requested deletion' }
                     });
-                    alert('Delete Action Logged successfully! Check the Admin Dashboard.');
+
+                    if (result.success) {
+                      alert('✅ Delete Action Logged successfully! Check the Admin Dashboard.');
+                    } else {
+                      alert(`❌ Error: ${result.message || 'Failed to log action'}\n\nMake sure:\n• Backend is running\n• VITE_API_URL is set correctly\n• You have a valid backend JWT token`);
+                    }
                   } catch (e) {
-                    alert('Error logging action. Please ensure you are logged in.');
+                    alert(`❌ Error logging action: ${e.message}\n\nPlease ensure you are logged in and backend is accessible.`);
                   }
                 }}
               >
