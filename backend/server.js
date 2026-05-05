@@ -67,6 +67,8 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/auth', authRoutes);
 app.use('/api/logs', logRoutes);
+
+
 app.use('/logs', logRoutes);
 
 // Welcome route
